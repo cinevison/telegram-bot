@@ -1,5 +1,8 @@
 from datetime import datetime, timedelta, timezone
 import logging
+import os
+import threading
+from flask import Flask
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import (
     ApplicationBuilder,
@@ -22,6 +25,17 @@ logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
 )
+
+# রেন্ডারের জন্য ফ্লাস্ক সার্ভার সেটআপ
+app_flask = Flask(__name__)
+
+@app_flask.route('/')
+def home():
+    return "Telegram Bot is running!"
+
+def run_flask():
+    port = int(os.environ.get("PORT", 5000))
+    app_flask.run(host='0.0.0.0', port=port)
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(
@@ -86,6 +100,9 @@ async def button_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await query.edit_message_text(text=f"{query.message.text}\n\n❌ **প্রত্যাখ্যাত**", parse_mode="Markdown")
 
 if __name__ == '__main__':
+    # ফ্লাস্ক সার্ভার ব্যাকগ্রাউন্ডে রান করার জন্য থ্রেড চালু করা হলো
+    threading.Thread(target=run_flask).start()
+
     app = ApplicationBuilder().token(TOKEN).build()
     app.add_handler(CommandHandler("start", start))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, receive_trx))

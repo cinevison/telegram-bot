@@ -90,5 +90,3 @@ if __name__ == '__main__':
     app.add_handler(CallbackQueryHandler(button_callback))
     
     app.run_polling()
-
-কোডটি বসানোর পর GitHub-এ Commit করে Render-এ পুনরায় Deploy দিয়ে দেখুন।
